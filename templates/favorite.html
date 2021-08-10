@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Index
+{% endblock %}
+
+{% block main %}
+  <div class="w-8/12 mx-auto my-10">
+    <p>この中から気分に合うアーティストを3組選んでください!!</p>
+  </div>
+  <div class="flex mb-4 w-8/12 mx-auto">
+    <form action="/favorite" method="post">
+      <div class="grid grid-cols-5 gap-4">
+        {% for artist in followed_artists %}
+          <div>
+            <img src="{{ artist.images.1.url}}">
+            <input type="checkbox" name="selected_artists" value="{{ artist.id }}">{{ artist.name }}</input>
+          </div>
+        {% endfor %}
+        
+      </div>
+      <div class="w-4/12 mx-auto">
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full w-full" type="submit">選ぶ</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

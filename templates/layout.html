@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <title>Beans Love Beers</title>
+  <link rel="stylesheet" href="{{url_for('static',filename='css/main.css')}}">
+</head>
+<body class = "bg-gray-100">
+  <nav class = "bg-gray-700" >
+    <div>
+      <a href="/">
+        <img src="/static/src/img/ramdofy_logo.png" class = "h-20">
+      </a>
+    </div>
+  </nav>
+  <header></header>
+  <main>
+    {% block main %}{% endblock %}
+  </main>
+  <footer>
+    Data provided for free by <a href="https://developer.spotify.com/documentation/web-api/">Spotify</a>.
+  </footer>
+</body>
+</html>
