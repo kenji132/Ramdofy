@@ -17,11 +17,25 @@
     </div>
   </nav>
   <header></header>
+  {% if get_flashed_messages() %}
+    <header >
+      <div role="alert" class="w-6/12 mx-auto">
+        <div class="bg-red-500 text-white font-bold rounded-t px-4 py-2 ">
+          Error
+        </div>
+        <div class="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700">
+          <p>{{ get_flashed_messages() | join(" ") }}</p>
+        </div>
+      </div>
+    </header>
+  {% endif %}
   <main>
     {% block main %}{% endblock %}
   </main>
-  <footer>
-    Data provided for free by <a href="https://developer.spotify.com/documentation/web-api/">Spotify</a>.
+  <footer class="md:text-center">
+    <p>
+      Data provided for free by <a href="https://developer.spotify.com/documentation/web-api/">Spotify</a>.
+    </p>
   </footer>
 </body>
 </html>
