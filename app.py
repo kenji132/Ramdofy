@@ -65,7 +65,7 @@ def relax():
       if feature[0]["loudness"] <= -10 and feature[0]["acousticness"] >= 0.5 and feature[0]["instrumentalness"] >= 0.8:
         url_list.append(track["track"]["external_urls"]["spotify"])
     if len(url_list) == 0:
-      flash("No tracks found")
+      flash("条件に当てはまる曲は見つけられませんでした")
       return render_template("relax.html")
     new_playlist = spotify.user_playlist_create(user = username, name = now + "relax")
     spotify.user_playlist_add_tracks(username, new_playlist["id"], url_list)
@@ -79,12 +79,15 @@ def workout():
     now = datetime.date.today().strftime("%y%y/%m/%d")
     tempo = request.form.get('tempo')
     url_list = []
+    if tempo == '':
+      flash("テンポを選んでください")
+      return render_template("workout.html")
     for track in saved_tracks["items"]:
       feature = spotify.audio_features(track["track"]["id"])
       if (feature[0]["tempo"] >= (float(tempo) - 5) and feature[0]["tempo"] <= (float(tempo) + 5)) and feature[0]["acousticness"] <= 0.01 and feature[0]["energy"] >= 0.9:
         url_list.append(track["track"]["external_urls"]["spotify"])
     if len(url_list) == 0:
-      flash("No tracks found")
+      flash("条件に当てはまる曲は見つけられませんでした")
       return render_template("workout.html")
     new_playlist = spotify.user_playlist_create(user = username, name = now + "workout")
     spotify.user_playlist_add_tracks(username, new_playlist["id"], url_list)
@@ -96,13 +99,12 @@ def workout():
 def favorite():
   if request.method == 'POST':
     now = datetime.date.today().strftime("%y%y/%m/%d")
-    new_playlist = spotify.user_playlist_create(user = username, name = now + "new_song")
     url_list = []
     sel_artists = request.form.getlist('selected_artists')
     print(sel_artists)
     if len(sel_artists) != 3:
       flash("アーティストを3組選んでください")
-      redirect("/favorite")
+      return render_template("favorite.html", followed_artists = artist["artists"]["items"])
     else:
       for id in sel_artists:
         result = spotify.artist_related_artists(id)
@@ -121,8 +123,8 @@ def favorite():
             if cnt == 5:
               break
 
+      new_playlist = spotify.user_playlist_create(user = username, name = now + "new_song")
       spotify.user_playlist_add_tracks(username, new_playlist["id"], url_list)
-
-    return redirect(new_playlist["external_urls"]["spotify"])
+      return redirect(new_playlist["external_urls"]["spotify"])
   else:
     return render_template("favorite.html", followed_artists = artist["artists"]["items"])

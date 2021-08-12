@@ -19,7 +19,7 @@
   <header></header>
   {% if get_flashed_messages() %}
     <header >
-      <div role="alert" class="w-6/12 mx-auto">
+      <div role="alert" class="mt-4 w-6/12 mx-auto">
         <div class="bg-red-500 text-white font-bold rounded-t px-4 py-2 ">
           Error
         </div>
@@ -32,7 +32,7 @@
   <main>
     {% block main %}{% endblock %}
   </main>
-  <footer class="md:text-center">
+  <footer class="text-center mt-6">
     <p>
       Data provided for free by <a href="https://developer.spotify.com/documentation/web-api/">Spotify</a>.
     </p>
