@@ -31,6 +31,7 @@ spotify = spotipy.Spotify(auth = token)
 saved_tracks = spotify.current_user_saved_tracks(limit = 50)
 artist = spotify.current_user_followed_artists(limit = 10, after = None)
 
+
 def take_next_artists(a):
   while True:
     after_num = len(a["artists"]["items"]) - 1
@@ -60,16 +61,17 @@ def relax():
   if request.method == 'POST':
     now = datetime.date.today().strftime("%y%y/%m/%d")
     url_list = []
+    data_list = []
     for track in saved_tracks["items"]:
       feature = spotify.audio_features(track["track"]["id"])
       if feature[0]["loudness"] <= -10 and feature[0]["acousticness"] >= 0.5 and feature[0]["instrumentalness"] >= 0.8:
         url_list.append(track["track"]["external_urls"]["spotify"])
+        data_list.append(track["track"])
     if len(url_list) == 0:
-      flash("条件に当てはまる曲は見つけられませんでした")
+      flash("条件に当てはまる曲は見つけられませんでした", "failed")
       return render_template("relax.html")
-    new_playlist = spotify.user_playlist_create(user = username, name = now + "relax")
-    spotify.user_playlist_add_tracks(username, new_playlist["id"], url_list)
-    return redirect(new_playlist["external_urls"]["spotify"])
+    flash("以下の曲が条件に当てはまりました", "success")
+    return render_template('confirm.html', data = data_list, url = url_list)
   else:
     return render_template("relax.html")
 
@@ -79,31 +81,46 @@ def workout():
     now = datetime.date.today().strftime("%y%y/%m/%d")
     tempo = request.form.get('tempo')
     url_list = []
+    data_list = []
     if tempo == '':
-      flash("テンポを選んでください")
+      flash("テンポを選んでください","success")
       return render_template("workout.html")
     for track in saved_tracks["items"]:
       feature = spotify.audio_features(track["track"]["id"])
       if (feature[0]["tempo"] >= (float(tempo) - 5) and feature[0]["tempo"] <= (float(tempo) + 5)) and feature[0]["acousticness"] <= 0.01 and feature[0]["energy"] >= 0.9:
         url_list.append(track["track"]["external_urls"]["spotify"])
+        data_list.append(track["track"])
     if len(url_list) == 0:
-      flash("条件に当てはまる曲は見つけられませんでした")
+      flash("条件に当てはまる曲は見つけられませんでした", "failed")
       return render_template("workout.html")
-    new_playlist = spotify.user_playlist_create(user = username, name = now + "workout")
+    flash("以下の曲が条件に当てはまりました", "success")
+    return render_template('confirm.html', data = data_list, url = url_list)
+  else:
+    return render_template("workout.html")
+
+@app.route('/confirm', methods=['GET','POST'])
+def confirm():
+  if request.method == 'POST':
+    url_list = request.form.getlist('urls')
+    # return jsonify(url_list)
+    flash("以下の曲が条件に当てはまりました", "success")
+    now = datetime.date.today().strftime("%y%y/%m/%d")
+    new_playlist = spotify.user_playlist_create(user = username, name = now + "new_song")
     spotify.user_playlist_add_tracks(username, new_playlist["id"], url_list)
     return redirect(new_playlist["external_urls"]["spotify"])
   else:
-    return render_template("workout.html")
+    return render_template('confirm.html')
 
 @app.route('/favorite', methods=['GET', 'POST'])
 def favorite():
   if request.method == 'POST':
     now = datetime.date.today().strftime("%y%y/%m/%d")
     url_list = []
+    data_list = []
     sel_artists = request.form.getlist('selected_artists')
     print(sel_artists)
     if len(sel_artists) != 3:
-      flash("アーティストを3組選んでください")
+      flash("アーティストを3組選んでください", "failed")
       return render_template("favorite.html", followed_artists = artist["artists"]["items"])
     else:
       for id in sel_artists:
@@ -120,11 +137,11 @@ def favorite():
           for track in top_tracks["tracks"]:
             cnt += 1
             url_list.append(track["external_urls"]["spotify"])
+            data_list.append(track)
             if cnt == 5:
               break
-
-      new_playlist = spotify.user_playlist_create(user = username, name = now + "new_song")
-      spotify.user_playlist_add_tracks(username, new_playlist["id"], url_list)
-      return redirect(new_playlist["external_urls"]["spotify"])
+      flash("以下の曲が条件に当てはまりました", "success")
+      return render_template('confirm.html', data = data_list, url = url_list)
   else:
     return render_template("favorite.html", followed_artists = artist["artists"]["items"])
+
