@@ -7,6 +7,7 @@ from flask import Flask, flash, redirect, render_template, request, jsonify,sess
 
 app = Flask(__name__)
 
+#環境変数の設定
 if not os.environ.get("SPOTIPY_USER_NAME_ID"):
     raise RuntimeError("SPOTIPY_USER_NAME_ID not set")
 if not os.environ.get("SPOTIPY_CLIENT_ID"):
@@ -23,7 +24,7 @@ client_secret = os.environ.get("SPOTIPY_CLIENT_SECRET")
 redirect_uri = os.environ.get("SPOTIPY_REDIRECT_URI")
 app.secret_key = os.environ.get("SECRET_KEY")
 
-
+#SpotifyAPIの利用スコープの設定
 scope = 'user-library-read user-read-playback-state playlist-read-private user-read-recently-played playlist-read-collaborative playlist-modify-public playlist-modify-private user-follow-modify user-follow-read'
 
 token = util.prompt_for_user_token(username, scope, client_id, client_secret, redirect_uri)
@@ -31,21 +32,22 @@ spotify = spotipy.Spotify(auth = token)
 saved_tracks = spotify.current_user_saved_tracks(limit = 50)
 artist = spotify.current_user_followed_artists(limit = 10, after = None)
 
-
+# ユーザーがフォローしていアーティストを１つの配列にまとめる関数
 def take_next_artists(a):
   while True:
     after_num = len(a["artists"]["items"]) - 1
     next_artist = spotify.current_user_followed_artists(limit = 10, after = a["artists"]["items"][after_num]["id"])
-    if len(next_artist) < 10:
+    if len(next_artist["artists"]["items"]) < 10:
       for i in range(len(next_artist["artists"]["items"])):
-        artist["artists"]["items"].append(next_artist["artists"]["items"][i])
+        a["artists"]["items"].append(next_artist["artists"]["items"][i])
       break
     else:
       for i in range(len(next_artist["artists"]["items"])):
-        artist["artists"]["items"].update(next_artist["artists"]["items"][i])
-      take_next_artists(next_artist)
-  return artist
+        a["artists"]["items"].append(next_artist["artists"]["items"][i])
+      take_next_artists(a)
+  return a
 
+# artist配列にフォローしているアーティストをまとめた
 take_next_artists(artist)
 
 client_credentials_manager = spotipy.oauth2.SpotifyClientCredentials(client_id, client_secret)
@@ -71,9 +73,14 @@ def relax():
       flash("条件に当てはまる曲は見つけられませんでした", "failed")
       return render_template("relax.html")
     flash("以下の曲が条件に当てはまりました", "success")
-    return render_template('confirm.html', data = data_list, url = url_list)
+    # return jsonify(data_list)
+    now = datetime.date.today().strftime("%y%y/%m/%d")
+    NAME = now + "relax"
+    return render_template('confirm.html', data = data_list, url = url_list, name = NAME)
   else:
     return render_template("relax.html")
+
+
 
 @app.route('/workout', methods=['GET', 'POST'])
 def workout():
@@ -83,8 +90,12 @@ def workout():
     url_list = []
     data_list = []
     if tempo == '':
-      flash("テンポを選んでください","success")
+      flash("テンポを入力してください","failed")
       return render_template("workout.html")
+    elif int(tempo) <= 0:
+      flash("テンポは0以上で入力してください","failed")
+      return render_template("workout.html")
+
     for track in saved_tracks["items"]:
       feature = spotify.audio_features(track["track"]["id"])
       if (feature[0]["tempo"] >= (float(tempo) - 5) and feature[0]["tempo"] <= (float(tempo) + 5)) and feature[0]["acousticness"] <= 0.01 and feature[0]["energy"] >= 0.9:
@@ -94,22 +105,28 @@ def workout():
       flash("条件に当てはまる曲は見つけられませんでした", "failed")
       return render_template("workout.html")
     flash("以下の曲が条件に当てはまりました", "success")
-    return render_template('confirm.html', data = data_list, url = url_list)
+    now = datetime.date.today().strftime("%y%y/%m/%d")
+    NAME = now + "workout"
+    return render_template('confirm.html', data = data_list, url = url_list, name = NAME)
   else:
     return render_template("workout.html")
+
+
 
 @app.route('/confirm', methods=['GET','POST'])
 def confirm():
   if request.method == 'POST':
     url_list = request.form.getlist('urls')
-    # return jsonify(url_list)
     flash("以下の曲が条件に当てはまりました", "success")
     now = datetime.date.today().strftime("%y%y/%m/%d")
-    new_playlist = spotify.user_playlist_create(user = username, name = now + "new_song")
+    playlist_name = request.form.get("playlist_name")
+    new_playlist = spotify.user_playlist_create(user = username, name = playlist_name)
     spotify.user_playlist_add_tracks(username, new_playlist["id"], url_list)
     return redirect(new_playlist["external_urls"]["spotify"])
   else:
     return render_template('confirm.html')
+
+
 
 @app.route('/favorite', methods=['GET', 'POST'])
 def favorite():
@@ -118,7 +135,6 @@ def favorite():
     url_list = []
     data_list = []
     sel_artists = request.form.getlist('selected_artists')
-    print(sel_artists)
     if len(sel_artists) != 3:
       flash("アーティストを3組選んでください", "failed")
       return render_template("favorite.html", followed_artists = artist["artists"]["items"])
@@ -141,7 +157,10 @@ def favorite():
             if cnt == 5:
               break
       flash("以下の曲が条件に当てはまりました", "success")
-      return render_template('confirm.html', data = data_list, url = url_list)
+      now = datetime.date.today().strftime("%y%y/%m/%d")
+      NAME = now + "workout"
+      return render_template('confirm.html', data = data_list, url = url_list, name = NAME)
   else:
+    # return jsonify(artist["artists"]["items"])
     return render_template("favorite.html", followed_artists = artist["artists"]["items"])
 
