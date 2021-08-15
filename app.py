@@ -73,7 +73,6 @@ def relax():
       flash("条件に当てはまる曲は見つけられませんでした", "failed")
       return render_template("relax.html")
     flash("以下の曲が条件に当てはまりました", "success")
-    # return jsonify(data_list)
     now = datetime.date.today().strftime("%y%y/%m/%d")
     NAME = now + "relax"
     return render_template('confirm.html', data = data_list, url = url_list, name = NAME)
@@ -95,7 +94,6 @@ def workout():
     elif int(tempo) <= 0:
       flash("テンポは0以上で入力してください","failed")
       return render_template("workout.html")
-
     for track in saved_tracks["items"]:
       feature = spotify.audio_features(track["track"]["id"])
       if (feature[0]["tempo"] >= (float(tempo) - 5) and feature[0]["tempo"] <= (float(tempo) + 5)) and feature[0]["acousticness"] <= 0.01 and feature[0]["energy"] >= 0.9:
@@ -107,7 +105,7 @@ def workout():
     flash("以下の曲が条件に当てはまりました", "success")
     now = datetime.date.today().strftime("%y%y/%m/%d")
     NAME = now + "workout"
-    return render_template('confirm.html', data = data_list, url = url_list, name = NAME)
+    return render_template('confirm.html', data = zip(data_list, url_list), url = url_list, name = NAME)
   else:
     return render_template("workout.html")
 
@@ -158,9 +156,8 @@ def favorite():
               break
       flash("以下の曲が条件に当てはまりました", "success")
       now = datetime.date.today().strftime("%y%y/%m/%d")
-      NAME = now + "workout"
+      NAME = now + "new_song"
       return render_template('confirm.html', data = data_list, url = url_list, name = NAME)
   else:
-    # return jsonify(artist["artists"]["items"])
     return render_template("favorite.html", followed_artists = artist["artists"]["items"])
 
