@@ -61,7 +61,6 @@ def index():
 @app.route('/relax', methods=['GET', 'POST'])
 def relax():
   if request.method == 'POST':
-    now = datetime.date.today().strftime("%y%y/%m/%d")
     url_list = []
     data_list = []
     for track in saved_tracks["items"]:
@@ -73,7 +72,7 @@ def relax():
       flash("条件に当てはまる曲は見つけられませんでした", "failed")
       return render_template("relax.html")
     flash("以下の曲が条件に当てはまりました", "success")
-    now = datetime.date.today().strftime("%y%y/%m/%d")
+    now = datetime.date.today().strftime("%Y/%m/%d")
     NAME = now + "relax"
     return render_template('confirm.html', data = data_list, url = url_list, name = NAME)
   else:
@@ -84,7 +83,6 @@ def relax():
 @app.route('/workout', methods=['GET', 'POST'])
 def workout():
   if request.method == 'POST':
-    now = datetime.date.today().strftime("%y%y/%m/%d")
     tempo = request.form.get('tempo')
     url_list = []
     data_list = []
@@ -103,9 +101,9 @@ def workout():
       flash("条件に当てはまる曲は見つけられませんでした", "failed")
       return render_template("workout.html")
     flash("以下の曲が条件に当てはまりました", "success")
-    now = datetime.date.today().strftime("%y%y/%m/%d")
+    now = datetime.date.today().strftime("%Y/%m/%d")
     NAME = now + "workout"
-    return render_template('confirm.html', data = zip(data_list, url_list), url = url_list, name = NAME)
+    return render_template('confirm.html', data = data_list, url = url_list, name = NAME)
   else:
     return render_template("workout.html")
 
@@ -116,7 +114,6 @@ def confirm():
   if request.method == 'POST':
     url_list = request.form.getlist('urls')
     flash("以下の曲が条件に当てはまりました", "success")
-    now = datetime.date.today().strftime("%y%y/%m/%d")
     playlist_name = request.form.get("playlist_name")
     new_playlist = spotify.user_playlist_create(user = username, name = playlist_name)
     spotify.user_playlist_add_tracks(username, new_playlist["id"], url_list)
@@ -129,7 +126,6 @@ def confirm():
 @app.route('/favorite', methods=['GET', 'POST'])
 def favorite():
   if request.method == 'POST':
-    now = datetime.date.today().strftime("%y%y/%m/%d")
     url_list = []
     data_list = []
     sel_artists = request.form.getlist('selected_artists')
@@ -155,7 +151,7 @@ def favorite():
             if cnt == 5:
               break
       flash("以下の曲が条件に当てはまりました", "success")
-      now = datetime.date.today().strftime("%y%y/%m/%d")
+      now = datetime.date.today().strftime("%Y/%m/%d")
       NAME = now + "new_song"
       return render_template('confirm.html', data = data_list, url = url_list, name = NAME)
   else:
