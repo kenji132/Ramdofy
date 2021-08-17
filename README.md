@@ -9,7 +9,6 @@ You can automatically create three types of playlists: when you want to relax (R
 Backend: Python,Flask<br>
 Frontend: Tailwind CSS
 
-#### 説明:
 SpotifyのWebAPIを用いて、自身のSpotifyアカウントでお気に入りに登録している曲やフォローしているアーティストの情報をもとに、今の気分にあったプレイリストを自動で作成するWebアプリです。
 また、Spotify APIには、AudioFeaturesObjectという曲の特徴を示す数値をJSONとして出力する機能があり、その数値も参考にしてプレイリストを作ります。<br>
 リラックスしたい時(Relax)、運動をしたい時(Workout)、自分の知らない新しいアーティストの音楽を聴きたい時(Favorite)の3種類のプレイリストを自動作成できます。
@@ -17,7 +16,7 @@ SpotifyのWebAPIを用いて、自身のSpotifyアカウントでお気に入り
 Backend: Python,Flask<br>
 Frontend: Tailwind CSS
 
-#### How to use
+How to use
 1. `git clone https://github.com/kenji132/Ramdofy.git`
 2. Download TailwindCSS
 3. Export Your spotify's SPOTIPY_USER_NAME_ID、SPOTIPY_CLIENT_ID、SPOTIPY_CLIENT_SECRET、SPOTIFY_REDIRECT_URL and SECRET_KEY<br>
@@ -30,7 +29,7 @@ Frontend: Tailwind CSS
 4. flask run and access http://127.0.0.1:5000/ 
 5. Welcome to Ramdofy!!!
 
-#### 使い方
+使い方
 1. `git clone https://github.com/kenji132/Ramdofy.git`を実行する
 2. TailwindCSSのmain.cssをsrc/cssに配置する
 3. 自身のspotifyのSPOTIPY_USER_NAME_ID、SPOTIPY_CLIENT_ID、SPOTIPY_CLIENT_SECRET、SPOTIFY_REDIRECT_URLとターミナルでランダムに作成したSECRET_KEYをexport文を用いてターミナルに打ち込む。<br>
